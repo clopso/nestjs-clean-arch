@@ -2,7 +2,6 @@ import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builde
 import { UserRules, UserValidator, UserValidatorFactory } from '../../user.validator';
 
 let sut: UserValidator;
-
 describe('UserValidator unit tests', () => {
   beforeEach(() => {
     sut = UserValidatorFactory.create();
@@ -134,6 +133,25 @@ describe('UserValidator unit tests', () => {
       expect(isValid).toBeFalsy();
       expect(sut.errors['password']).toStrictEqual([
         'password must be shorter than or equal to 100 characters'
+      ])
+    });
+  });
+
+  describe('createdAt field', () => {
+    it('Invalidation cases for createdAt field', () => {
+      let isValid = sut.validate({...UserDataBuilder({}), createdAt: 10 as any });
+      expect(isValid).toBeFalsy();
+      expect(sut.errors['createdAt']).toStrictEqual([
+        'createdAt must be a Date instance',
+      ])
+
+      isValid = sut.validate({
+        ...UserDataBuilder({}),
+        createdAt: '2023' as any
+      })
+      expect(isValid).toBeFalsy();
+      expect(sut.errors['createdAt']).toStrictEqual([
+        'createdAt must be a Date instance',
       ])
     });
   });
