@@ -1,6 +1,6 @@
 import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 import { UserProps } from "../entities/user.entity";
-import { ClassValidatorFields } from "@/shared/domain/entities/validator/class-validator-fields";
+import { ClassValidatorFields } from "@/shared/domain/validator/class-validator-fields";
 
 export class UserRules {
   @MaxLength(255)
