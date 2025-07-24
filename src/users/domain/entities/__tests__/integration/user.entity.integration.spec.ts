@@ -88,7 +88,7 @@ describe("UserEntity integration tests", () => {
   })
 
   describe("Update method", () => {
-    it("Should throw an error when creating a user with invalid name", () => {
+    it("Should throw an error when updating a user with invalid name", () => {
       const entity = new UserEntity(UserDataBuilder({}))
 
       expect(() => entity.update("")).toThrow(EntityValidationError)
@@ -104,6 +104,26 @@ describe("UserEntity integration tests", () => {
 
       const entity = new UserEntity(props)
       entity.update("Other Name")
+    })
+  })
+
+  describe("Update password method", () => {
+    it("Should be a invalid user using password field", () => {
+      const entity = new UserEntity(UserDataBuilder({}))
+
+      expect(() => entity.updatePassword("")).toThrow(EntityValidationError)
+      expect(() => entity.updatePassword(10 as any)).toThrow(EntityValidationError)
+      expect(() => entity.updatePassword('a'.repeat(101))).toThrow(EntityValidationError)
+    })
+
+    it("Should be a valid user", () => {
+      expect.assertions(0)
+      let props: UserProps = {
+        ...UserDataBuilder({}),
+      }
+
+      const entity = new UserEntity(props)
+      entity.updatePassword("Other Password")
     })
   })
 })
