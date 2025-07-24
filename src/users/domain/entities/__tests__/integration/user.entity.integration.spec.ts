@@ -86,4 +86,24 @@ describe("UserEntity integration tests", () => {
       new UserEntity(props)
     })
   })
+
+  describe("Update method", () => {
+    it("Should throw an error when creating a user with invalid name", () => {
+      const entity = new UserEntity(UserDataBuilder({}))
+
+      expect(() => entity.update("")).toThrow(EntityValidationError)
+      expect(() => entity.update(10 as any)).toThrow(EntityValidationError)
+      expect(() => entity.update('a'.repeat(256))).toThrow(EntityValidationError)
+    })
+
+    it("Should be a valid user", () => {
+      expect.assertions(0)
+      let props: UserProps = {
+        ...UserDataBuilder({}),
+      }
+
+      const entity = new UserEntity(props)
+      entity.update("Other Name")
+    })
+  })
 })
