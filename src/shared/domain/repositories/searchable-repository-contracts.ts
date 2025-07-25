@@ -13,24 +13,24 @@ export type SearchProps<Filter = string> = {
 
 export class SearchParams {
   protected _page: number;
-  protected _perPage: number;
+  protected _perPage = 15;
   protected _sort: string | null;
   protected _sortDir: SortDirection | null;
   protected _filter: string | null;
 
-  constructor(props: SearchProps) {
-    this._page = props.page ?? 1;
-    this._perPage = props.perPage ?? 15;
-    this._sort = props.sort ?? null;
-    this._sortDir = props.sortDir ?? null;
-    this._filter = props.filter ?? null;
+  constructor(props: SearchProps = {}) {
+    this.page = props.page ?? 1;
+    this.perPage = props.perPage ?? 15;
+    this.sort = props.sort ?? null;
+    this.sortDir = props.sortDir ?? null;
+    this.filter = props.filter ?? null;
   }
 
   get page() {
     return this._page;
   }
   private set page(value: number) {
-    let _page = +value
+    let _page = value
     if (Number.isNaN(_page) || _page <= 0 || parseInt(_page as any) !== _page) {
       _page = 1
     }
@@ -42,9 +42,9 @@ export class SearchParams {
     return this._perPage
   }
   private set perPage(value: number) {
-    let _perPage = +value
+    let _perPage = value === (true as any) ? this._perPage : +value
     if (Number.isNaN(_perPage) || _perPage <= 0 || parseInt(_perPage as any) !== _perPage) {
-      _perPage = 1
+      _perPage = this._perPage
     }
 
     this._perPage = _perPage
