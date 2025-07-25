@@ -1,8 +1,8 @@
-import { RepositoryInterface } from "@/shared/domain/repositories/repository-contracts"
-import { UserEntity } from "../entities/user.entity"
+import { UserEntity } from '../entities/user.entity';
+import { SearchableRepositoryInterface } from '@/shared/domain/repositories/searchable-repository-contracts';
 
-export interface UserRepository extends RepositoryInterface<UserEntity> {
-  findByEmail(email: string): Promise<UserEntity>
-  emailExist(email: string): Promise<void>
+export interface UserRepository
+  extends SearchableRepositoryInterface<UserEntity, any, any> {
+  findByEmail(email: string): Promise<UserEntity>;
+  emailExist(email: string): Promise<void>;
 }
-
