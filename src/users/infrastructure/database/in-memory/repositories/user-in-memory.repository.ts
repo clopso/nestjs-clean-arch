@@ -12,7 +12,7 @@ export class UserInMemoryRepository
   sortableFields: string[] = ['name', 'createdAt'];
   async findByEmail(email: string): Promise<UserEntity> {
     const _email = `${email}`;
-    const entity = this.items.find((item) => item.id === _email);
+    const entity = this.items.find((item) => item.email === _email);
     if (!entity) {
       throw new NotFoundError(`Entity not found using email ${email}`);
     }
@@ -22,7 +22,7 @@ export class UserInMemoryRepository
 
   async emailExist(email: string): Promise<void> {
     const _email = `${email}`;
-    const entity = this.items.find((item) => item.id === _email);
+    const entity = this.items.find((item) => item.email === _email);
     if (entity) {
       throw new ConflictError(`Email address already used`);
     }
