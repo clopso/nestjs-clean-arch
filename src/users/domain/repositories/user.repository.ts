@@ -6,7 +6,7 @@ import {
 } from '@/shared/domain/repositories/searchable-repository-contracts';
 
 export namespace UserRepository {
-  export type Filter = string;
+  export type Filter = string | null;
 
   export class SearchParams extends DefaultSearchParams<Filter> {}
   export class SearchResult extends DefaultSearchResult<UserEntity, Filter> {}
