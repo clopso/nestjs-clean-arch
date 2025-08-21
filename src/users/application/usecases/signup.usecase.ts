@@ -1,6 +1,7 @@
 import { UserRepository } from "@/users/domain/repositories/user.repository";
 import { BadRequestError } from "../erros/bad-request-error";
 import { UserEntity } from "@/users/domain/entities/user.entity";
+import { BcryptjsHashProvider } from "@/users/infrastructure/database/in-memory/repositories/providers/hash-provider/bcryptjs-hash.provider";
 
 export namespace SignupUseCase {
   export type Input = {
@@ -18,7 +19,11 @@ export namespace SignupUseCase {
   };
 
   export class UseCase {
-    constructor(private userRepository: UserRepository.Repository) {
+    constructor(
+      private userRepository: UserRepository.Repository,
+      private hashProvider: BcryptjsHashProvider
+
+    ) {
 
     }
     async execute(input: Input): Promise<Output> {
@@ -28,7 +33,11 @@ export namespace SignupUseCase {
       }
       await this.userRepository.emailExist(email);
 
-      const entity = new UserEntity(input)
+      const hashPassword = await this.hashProvider.generateHash(password)
+
+      const entity = new UserEntity(
+        Object.assign(input, { password: hashPassword })
+      )
       await this.userRepository.insert(entity)
 
       return entity.toJSON()
