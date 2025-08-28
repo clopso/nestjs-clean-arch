@@ -3,6 +3,7 @@ import { UserOutput, UserOutputMapper } from '../dtos/user-output';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
 import { BadRequestError } from '@/shared/application/erros/bad-request-error';
 import { HashProvider } from '@/shared/application/providers/hash-provider';
+import { InvalidPasswordError } from '@/shared/application/erros/invalid-password-error';
 
 export namespace UpdatePasswordUseCase {
   export type Input = {
@@ -22,7 +23,7 @@ export namespace UpdatePasswordUseCase {
     async execute(input: Input): Promise<Output> {
       const entity = await this.userRepository.findById(input.id);
       if (!input.password || !input.oldPassword) {
-        throw new BadRequestError('Old password and new password is required');
+        throw new InvalidPasswordError('Old password and new password is required');
       }
 
       const checkOldPassword = await this.hashProvider.compareHash(
@@ -30,7 +31,7 @@ export namespace UpdatePasswordUseCase {
         entity.password,
       );
       if (!checkOldPassword) {
-        throw new BadRequestError('Old password does not match');
+        throw new InvalidPasswordError('Old password does not match');
       }
       const hashPassword = await this.hashProvider.generateHash(input.password)
       entity.updatePassword(hashPassword);
