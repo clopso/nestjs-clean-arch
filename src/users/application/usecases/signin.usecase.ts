@@ -4,10 +4,10 @@ import { UserEntity } from '@/users/domain/entities/user.entity';
 import { BcryptjsHashProvider } from '@/users/infrastructure/database/in-memory/repositories/providers/hash-provider/bcryptjs-hash.provider';
 import { UserOutput, UserOutputMapper } from '../dtos/user-output';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
+import { InvalidCredentialsError } from '@/shared/application/erros/invalid-credentials-error';
 
 export namespace SignupUseCase {
   export type Input = {
-    name: string;
     email: string;
     password: string;
   };
@@ -20,18 +20,19 @@ export namespace SignupUseCase {
       private hashProvider: BcryptjsHashProvider,
     ) {}
     async execute(input: Input): Promise<Output> {
-      const { email, name, password } = input;
-      if (!email || !name || !password) {
+      const { email, password } = input;
+      if (!email || !password) {
         throw new BadRequestError('Input data not provided');
       }
-      await this.userRepository.emailExist(email);
 
-      const hashPassword = await this.hashProvider.generateHash(password);
-
-      const entity = new UserEntity(
-        Object.assign(input, { password: hashPassword }),
+      const entity = await this.userRepository.findByEmail(email);
+      const hashPasswordMatches = await this.hashProvider.compareHash(
+        password,
+        entity.password
       );
-      await this.userRepository.insert(entity);
+      if (!hashPasswordMatches) {
+        throw new InvalidCredentialsError('Invalid credentials');
+      }
 
       return UserOutputMapper.toOutput(entity);
     }
