@@ -95,4 +95,17 @@ describe('UsersController unit tests', () => {
     });
     expect(output).toMatchObject(result);
   });
+
+  it('should delete an user', async () => {
+    const output = undefined;
+    const mockDeleteUserUseCase = {
+      execute: jest.fn().mockReturnValue(Promise.resolve(output)),
+    };
+    sut['deleteUserUseCase'] = mockDeleteUserUseCase as any;
+    const result = await sut.remove(id);
+    expect(mockDeleteUserUseCase.execute).toHaveBeenCalledWith({
+      id,
+    });
+    expect(output).toStrictEqual(result);
+  });
 });
