@@ -8,6 +8,7 @@ import { UserEntity } from '@/users/domain/entities/user.entity';
 import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
 import { UserModelMapper } from '../../../models/user-model.mapper';
 import { UserRepository } from '@/users/domain/repositories/user.repository';
+import { ConflictError } from '@/shared/domain/erros/conflict-error';
 
 describe('UserPrismaRepository integration tests', () => {
   const prismaService = new PrismaClient();
@@ -31,7 +32,7 @@ describe('UserPrismaRepository integration tests', () => {
   });
 
   it('Should throws error when entity not found', async () => {
-    expect(() => sut.findById('fakeId')).rejects.toThrow(
+    await expect(() => sut.findById('fakeId')).rejects.toThrow(
       new NotFoundError(`UserModel not found using ID fakeId`),
     );
   });
@@ -68,14 +69,14 @@ describe('UserPrismaRepository integration tests', () => {
 
   it('Should throws error on update when entity not found', async () => {
     const entity = new UserEntity(UserDataBuilder({}));
-    expect(() => sut.update(entity)).rejects.toThrow(
+    await expect(() => sut.update(entity)).rejects.toThrow(
       new NotFoundError(`UserModel not found using ID ${entity._id}`),
     );
   });
 
   it('Should update an entity', async () => {
     const entity = new UserEntity(UserDataBuilder({}));
-    const newUser = await prismaService.user.create({
+    await prismaService.user.create({
       data: entity.toJSON(),
     });
 
@@ -92,14 +93,14 @@ describe('UserPrismaRepository integration tests', () => {
 
   it('Should throws error on delete when entity not found', async () => {
     const entity = new UserEntity(UserDataBuilder({}));
-    expect(() => sut.delete(entity._id)).rejects.toThrow(
+    await expect(() => sut.delete(entity._id)).rejects.toThrow(
       new NotFoundError(`UserModel not found using ID ${entity._id}`),
     );
   });
 
   it('Should delete an entity', async () => {
     const entity = new UserEntity(UserDataBuilder({}));
-    const newUser = await prismaService.user.create({
+    await prismaService.user.create({
       data: entity.toJSON(),
     });
 
@@ -111,6 +112,37 @@ describe('UserPrismaRepository integration tests', () => {
       },
     });
     expect(output).toBeNull();
+  });
+
+  it('Should throws error when entity not found by email', async () => {
+    await expect(() => sut.findByEmail('a@a.com')).rejects.toThrow(
+      new NotFoundError(`UserModel not found using ID a@a.com`),
+    );
+  });
+
+  it('Should find an entity by email', async () => {
+    const entity = new UserEntity(UserDataBuilder({ email: 'a@a.com' }));
+    await prismaService.user.create({
+      data: entity.toJSON(),
+    });
+    const output = await sut.findByEmail('a@a.com');
+    expect(output.toJSON()).toStrictEqual(entity.toJSON());
+  });
+
+  it('Should throws error when entity is found by email', async () => {
+    const entity = new UserEntity(UserDataBuilder({ email: 'a@a.com' }));
+    await prismaService.user.create({
+      data: entity.toJSON(),
+    });
+
+    await expect(() => sut.emailExist('a@a.com')).rejects.toThrow(
+      new ConflictError(`Email address already used`),
+    );
+  });
+
+  it('Should not found an entity by email', async () => {
+    expect.assertions(0)
+    await sut.emailExist('a@a.com')
   });
 
   describe('Search method tests', () => {
