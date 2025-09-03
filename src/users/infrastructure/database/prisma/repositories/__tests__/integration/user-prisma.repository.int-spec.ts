@@ -41,18 +41,18 @@ describe('UserPrismaRepository integration tests', () => {
     const newUser = await prismaService.user.create({
       data: entity.toJSON(),
     });
-    const output = await sut.findById(newUser.id)
+    const output = await sut.findById(newUser.id);
     expect(output.toJSON()).toStrictEqual(entity.toJSON());
   });
 
   it('Should insert an new entity', async () => {
     const entity = new UserEntity(UserDataBuilder({}));
-    await sut.insert(entity)
+    await sut.insert(entity);
     const output = await prismaService.user.findUnique({
       where: {
-        id: entity._id
-      }
-    })
+        id: entity._id,
+      },
+    });
     expect(output).toStrictEqual(entity.toJSON());
   });
 
@@ -61,16 +61,16 @@ describe('UserPrismaRepository integration tests', () => {
     await prismaService.user.create({
       data: entity.toJSON(),
     });
-    const output = await sut.findAll()
-    expect(output).toHaveLength(1)
-    output.map(item => expect(item.toJSON()).toStrictEqual(entity.toJSON()))
+    const output = await sut.findAll();
+    expect(output).toHaveLength(1);
+    output.map((item) => expect(item.toJSON()).toStrictEqual(entity.toJSON()));
   });
 
   describe('Search method tests', () => {
     it('Should apply only pagination when other params are null', async () => {
-      const createdAt = new Date()
-      const entities: UserEntity[] = []
-      const arrange = Array(16).fill(UserDataBuilder({}))
+      const createdAt = new Date();
+      const entities: UserEntity[] = [];
+      const arrange = Array(16).fill(UserDataBuilder({}));
       arrange.forEach((element, index) => {
         entities.push(
           new UserEntity({
@@ -78,21 +78,28 @@ describe('UserPrismaRepository integration tests', () => {
             name: `User${index}`,
             email: `test${index}@mail.com`,
             createdAt: new Date(createdAt.getTime() + index),
-          })
-        )
-      })
+          }),
+        );
+      });
 
       await prismaService.user.createMany({
-        data: entities.map(item => item.toJSON())
-      })
+        data: entities.map((item) => item.toJSON()),
+      });
 
-      const searchOutput = await sut.search(new UserRepository.SearchParams())
-      expect(searchOutput).toBeInstanceOf(UserRepository.SearchResult)
-      expect(searchOutput.total).toBe(16)
-      expect(searchOutput.items.length).toBe(15)
-      searchOutput.items.forEach(item => {
-        expect(item).toBeInstanceOf(UserEntity)
-      })
+      const searchOutput = await sut.search(new UserRepository.SearchParams());
+
+      const items = searchOutput.items;
+
+      expect(searchOutput).toBeInstanceOf(UserRepository.SearchResult);
+      expect(searchOutput.total).toBe(16);
+      expect(searchOutput.items.length).toBe(15);
+      searchOutput.items.forEach((item) => {
+        expect(item).toBeInstanceOf(UserEntity);
+      });
+
+      items.reverse().forEach((item, index) => {
+        expect(`test${index + 1}@mail.com`).toBe(item.email);
+      });
     });
   });
 });
